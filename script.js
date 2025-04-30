@@ -11,7 +11,7 @@ const reaquireCheck = document.querySelector("#reaquire");
 const downloadButton = document.querySelector("#download-file");
 
 const downloadFile = async () => {
-  return fetch("/Free_Test_Data_10.5MB_PDF.pdf", {
+  return fetch("/20mb.pdf", {
     headers: {
       mode: "no-cors",
     },

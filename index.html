@@ -1,60 +1,1015 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Wake Lock Demo</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kathak Dabhi — Principal Software Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:    #1C3A5E;
+      --teal:    #1D9E75;
+      --teal-lt: #E8F7F2;
+      --black:   #0F1923;
+      --gray-1:  #3A4555;
+      --gray-2:  #6B7A8D;
+      --gray-3:  #A8B4C0;
+      --gray-4:  #E8ECF0;
+      --gray-5:  #F4F6F8;
+      --white:   #FFFFFF;
+      --serif:   'DM Serif Display', Georgia, serif;
+      --sans:    'DM Sans', sans-serif;
+      --mono:    'JetBrains Mono', monospace;
+      --radius:  12px;
+      --shadow:  0 4px 24px rgba(28,58,94,0.10);
+      --shadow-lg: 0 12px 48px rgba(28,58,94,0.14);
+    }
 
-    <!-- my styles -->
-    <link rel="stylesheet" href="moz.css" />
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <style>
-      #status {
-        width: 50vw;
-        min-width: 500px;
-        margin-top: 20px;
-      }
-      #status h2 {
-        margin-top: 0px;
-      }
-      #status p {
-        padding-left: 20px;
-      }
-      [data-status="off"] ~ #status {
-        border: 2px solid red;
-      }
-      [data-status="on"] ~ #status {
-        border: 2px solid green;
-      }
-    </style>
+    html { scroll-behavior: smooth; }
 
-    <script src="script.js" defer></script>
-  </head>
-  <body>
-    <header>
-      <h1>Wake Lock Demo</h1>
-    </header>
+    body {
+      font-family: var(--sans);
+      background: var(--white);
+      color: var(--black);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
 
-    <p>
-      The button below changes depending on whether wake lock is active or not.
-    </p>
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5vw;
+      height: 64px;
+      background: rgba(255,255,255,0.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-4);
+      transition: box-shadow 0.3s;
+    }
+    nav.scrolled { box-shadow: var(--shadow); }
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 1.25rem;
+      color: var(--navy);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gray-2);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--teal); }
+    .nav-cta {
+      background: var(--navy);
+      color: var(--white) !important;
+      padding: 8px 18px;
+      border-radius: 6px;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--teal) !important; color: var(--white) !important; }
 
-    <button data-status="off">Turn Wake Lock ON</button>
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 100px 5vw 80px;
+      gap: 4rem;
+      background: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      right: -10%;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(29,158,117,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    #hero::after {
+      content: '';
+      position: absolute;
+      bottom: -10%;
+      left: -5%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(28,58,94,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
 
-    <button id="download-file">Download File</button>
+    .hero-text { position: relative; z-index: 1; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--teal);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.1s forwards;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 28px; height: 2px;
+      background: var(--teal);
+      border-radius: 2px;
+    }
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      line-height: 1.08;
+      color: var(--navy);
+      letter-spacing: -1px;
+      margin-bottom: 1.25rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.2s forwards;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--teal);
+    }
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--gray-1);
+      line-height: 1.75;
+      max-width: 480px;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.3s forwards;
+    }
+    .hero-tags {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.4s forwards;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 4px 12px;
+      border-radius: 4px;
+      background: var(--teal-lt);
+      color: var(--teal);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.5s forwards;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: var(--navy); color: var(--white); }
+    .btn-primary:hover { background: var(--teal); transform: translateY(-2px); box-shadow: var(--shadow); }
+    .btn-outline { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); }
+    .btn-outline:hover { background: var(--navy); color: var(--white); transform: translateY(-2px); }
 
-    <section id="status">
-      <h2>Wake Lock Status</h2>
-      <p></p>
-    </section>
+    /* Avatar illustration */
+    .hero-visual {
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+      opacity: 0;
+      animation: fadeIn 0.8s 0.4s forwards;
+    }
+    .avatar-wrap {
+      position: relative;
+      width: 340px; height: 340px;
+    }
+    .avatar-wrap svg { width: 100%; height: 100%; }
+    .avatar-ring {
+      position: absolute; inset: -16px;
+      border-radius: 50%;
+      border: 2px dashed rgba(29,158,117,0.25);
+      animation: spin 20s linear infinite;
+    }
+    .avatar-dot {
+      position: absolute;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--teal);
+      top: -6px; left: 50%;
+      transform: translateX(-50%);
+    }
+    .floating-chip {
+      position: absolute;
+      background: var(--white);
+      border: 1px solid var(--gray-4);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--navy);
+      box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 6px;
+      white-space: nowrap;
+    }
+    .chip-1 { top: 10%; right: -20px; animation: float 3s ease-in-out infinite; }
+    .chip-2 { bottom: 18%; left: -24px; animation: float 3s ease-in-out 1s infinite; }
+    .chip-3 { top: 55%; right: -28px; animation: float 3s ease-in-out 0.5s infinite; }
+    .chip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); }
 
-    <p>Wake lock will automatically release if if the tab becomes inactive.</p>
-    <p>
-      To re-activate the wake lock automatically when the tab becomes active
-      again, check this box: <input type="checkbox" id="reaquire" />
-    </p>
-  </body>
+    /* stat strip */
+    .stat-strip {
+      display: flex; gap: 0;
+      margin-top: 3rem;
+      border-top: 1px solid var(--gray-4);
+      opacity: 0;
+      animation: fadeUp 0.6s 0.6s forwards;
+    }
+    .stat-item {
+      flex: 1;
+      padding: 1.5rem 0 0;
+      text-align: left;
+    }
+    .stat-item + .stat-item { padding-left: 2rem; border-left: 1px solid var(--gray-4); margin-left: 2rem; }
+    .stat-num {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      color: var(--navy);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-num span { color: var(--teal); }
+    .stat-label { font-size: 0.82rem; color: var(--gray-2); font-weight: 400; }
+
+    /* ── SECTIONS ── */
+    section { padding: 100px 5vw; }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--teal);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 0.75rem;
+    }
+    .section-label::after { content: ''; flex: 1; max-width: 40px; height: 1px; background: var(--teal); }
+    h2 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      color: var(--navy);
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+    .section-intro {
+      font-size: 1rem;
+      color: var(--gray-2);
+      max-width: 560px;
+      margin-bottom: 3.5rem;
+      line-height: 1.8;
+    }
+
+    /* ── ABOUT ── */
+    #about { background: var(--gray-5); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+    .about-text p {
+      font-size: 1rem;
+      color: var(--gray-1);
+      line-height: 1.85;
+      margin-bottom: 1.25rem;
+    }
+    .about-text p strong { color: var(--navy); font-weight: 600; }
+    .about-cards { display: flex; flex-direction: column; gap: 1rem; }
+    .about-card {
+      background: var(--white);
+      border: 1px solid var(--gray-4);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      display: flex; gap: 1rem; align-items: flex-start;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .about-card:hover { box-shadow: var(--shadow); transform: translateX(4px); }
+    .about-card-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: var(--teal-lt);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.2rem;
+    }
+    .about-card-title { font-weight: 600; color: var(--navy); font-size: 0.92rem; margin-bottom: 2px; }
+    .about-card-desc { font-size: 0.84rem; color: var(--gray-2); line-height: 1.5; }
+
+    /* ── PROJECTS ── */
+    #projects { background: var(--white); }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+    .project-card {
+      background: var(--white);
+      border: 1px solid var(--gray-4);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--teal);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+    .project-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .project-card:hover::before { transform: scaleX(1); }
+    .project-company {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--gray-3);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .project-name {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .project-domain {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 4px;
+      background: var(--teal-lt);
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+    .project-desc {
+      font-size: 0.88rem;
+      color: var(--gray-1);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .project-techs {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      border-top: 1px solid var(--gray-4);
+      padding-top: 12px;
+      margin-top: auto;
+    }
+    .project-tech {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--gray-2);
+      background: var(--gray-5);
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+
+    /* role group heading in projects */
+    .role-group { grid-column: 1 / -1; margin-top: 1rem; margin-bottom: -0.25rem; }
+    .role-group h3 {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--navy);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--gray-4);
+    }
+
+    /* ── SKILLS ── */
+    #skills { background: var(--gray-5); }
+    .skills-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .skill-group {
+      background: var(--white);
+      border: 1px solid var(--gray-4);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: box-shadow 0.2s;
+    }
+    .skill-group:hover { box-shadow: var(--shadow); }
+    .skill-group-title {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .skill-group-title::before {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      background: var(--teal);
+      flex-shrink: 0;
+    }
+    .skill-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .skill-pill {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 5px 10px;
+      border-radius: 5px;
+      background: var(--gray-5);
+      color: var(--gray-1);
+      border: 1px solid var(--gray-4);
+      transition: all 0.15s;
+    }
+    .skill-pill:hover { background: var(--teal-lt); color: var(--teal); border-color: var(--teal); }
+
+    /* ── EXPERIENCE ── */
+    #experience { background: var(--white); }
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 8px; bottom: 8px;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--teal), var(--gray-4));
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 3rem;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: all 0.5s;
+    }
+    .timeline-item.visible { opacity: 1; transform: translateX(0); }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 6px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--teal);
+      border: 2px solid var(--white);
+      box-shadow: 0 0 0 2px var(--teal);
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+    .timeline-title { font-weight: 600; font-size: 1.05rem; color: var(--navy); }
+    .timeline-dates {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--gray-3);
+      white-space: nowrap;
+    }
+    .timeline-company { font-size: 0.88rem; color: var(--teal); font-weight: 500; margin-bottom: 0.75rem; }
+    .timeline-bullets { padding-left: 1rem; }
+    .timeline-bullets li {
+      font-size: 0.88rem;
+      color: var(--gray-1);
+      line-height: 1.7;
+      margin-bottom: 4px;
+      list-style: disc;
+    }
+    .timeline-bullets li::marker { color: var(--teal); }
+
+    /* ── CONTACT ── */
+    #contact {
+      background: var(--navy);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #contact::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(29,158,117,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    #contact .section-label { justify-content: center; color: rgba(255,255,255,0.5); }
+    #contact .section-label::after { background: rgba(255,255,255,0.3); }
+    #contact h2 { color: var(--white); margin-bottom: 0.75rem; }
+    #contact .section-intro { color: rgba(255,255,255,0.6); margin: 0 auto 3rem; }
+    .contact-links {
+      display: flex; gap: 1.25rem; justify-content: center; flex-wrap: wrap;
+    }
+    .contact-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.92rem;
+      transition: all 0.2s;
+      backdrop-filter: blur(4px);
+    }
+    .contact-link:hover { background: var(--teal); border-color: var(--teal); transform: translateY(-2px); }
+    .contact-icon { font-size: 1.1rem; }
+
+    /* footer */
+    .footer-note {
+      margin-top: 4rem;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.3);
+    }
+    .footer-note a { color: var(--teal); text-decoration: none; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.6s, transform 0.6s;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      #hero { grid-template-columns: 1fr; padding-top: 120px; }
+      .hero-visual { order: -1; }
+      .avatar-wrap { width: 220px; height: 220px; }
+      .floating-chip { display: none; }
+      .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      section { padding: 70px 5vw; }
+      .stat-strip { flex-direction: column; gap: 1.5rem; }
+      .stat-item + .stat-item { padding-left: 0; border-left: none; margin-left: 0; border-top: 1px solid var(--gray-4); padding-top: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a class="nav-logo" href="#hero">KD</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#contact" class="nav-cta">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Principal Software Engineer</div>
+      <h1>Building systems that <em>scale</em> and teams that grow.</h1>
+      <p class="hero-sub">10+ years architecting fullstack products across EdTech, FinTech, and Logistics. From zero to production at scale — microservices, real-time engines, AI integration.</p>
+      <div class="hero-tags">
+        <span class="tag">Node.js</span>
+        <span class="tag">React</span>
+        <span class="tag">TypeScript</span>
+        <span class="tag">AWS / GCP</span>
+        <span class="tag">Microservices</span>
+        <span class="tag">AI Integration</span>
+      </div>
+      <div class="hero-actions">
+        <a href="#projects" class="btn btn-primary">View Projects →</a>
+        <a href="#contact" class="btn btn-outline">Get in Touch</a>
+      </div>
+      <div class="stat-strip">
+        <div class="stat-item">
+          <div class="stat-num">10<span>+</span></div>
+          <div class="stat-label">Years of experience</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">60<span>k</span></div>
+          <div class="stat-label">Users served</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">75<span>%</span></div>
+          <div class="stat-label">AI cost reduction</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="avatar-wrap">
+        <div class="avatar-ring"><div class="avatar-dot"></div></div>
+        <!-- Stylised developer avatar SVG -->
+        <svg viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background circle -->
+          <circle cx="170" cy="170" r="160" fill="#F4F6F8"/>
+          <circle cx="170" cy="170" r="160" fill="url(#bg-grad)" opacity="0.6"/>
+          <!-- Body / jacket -->
+          <ellipse cx="170" cy="290" rx="90" ry="70" fill="#1C3A5E"/>
+          <!-- Shirt collar -->
+          <path d="M145 240 L170 260 L195 240 L185 220 L170 230 L155 220 Z" fill="white"/>
+          <!-- Tie -->
+          <path d="M170 230 L163 255 L170 265 L177 255 Z" fill="#1D9E75"/>
+          <!-- Jacket lapels -->
+          <path d="M145 240 L120 220 L130 200 L170 230" fill="#162F4E"/>
+          <path d="M195 240 L220 220 L210 200 L170 230" fill="#162F4E"/>
+          <!-- Neck -->
+          <rect x="155" y="195" width="30" height="30" rx="6" fill="#D4956A"/>
+          <!-- Head -->
+          <ellipse cx="170" cy="160" rx="58" ry="62" fill="#D4956A"/>
+          <!-- Hair -->
+          <path d="M112 148 Q115 100 170 98 Q225 100 228 148 Q220 118 170 115 Q120 118 112 148Z" fill="#1a1a1a"/>
+          <!-- Hair side -->
+          <path d="M112 148 Q108 135 112 120 Q118 108 128 105 Q118 125 116 148Z" fill="#1a1a1a"/>
+          <!-- Eyes -->
+          <ellipse cx="150" cy="158" rx="7" ry="7.5" fill="white"/>
+          <ellipse cx="190" cy="158" rx="7" ry="7.5" fill="white"/>
+          <circle cx="152" cy="159" r="4" fill="#2a1a0a"/>
+          <circle cx="192" cy="159" r="4" fill="#2a1a0a"/>
+          <circle cx="153" cy="157" r="1.5" fill="white"/>
+          <circle cx="193" cy="157" r="1.5" fill="white"/>
+          <!-- Eyebrows -->
+          <path d="M141 148 Q150 143 159 146" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M181 146 Q190 143 199 148" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <!-- Nose -->
+          <path d="M167 168 Q163 180 166 183 Q170 186 174 183 Q177 180 173 168" stroke="#B87840" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- Mouth — slight smile -->
+          <path d="M157 193 Q170 201 183 193" stroke="#A06030" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Ears -->
+          <ellipse cx="112" cy="162" rx="8" ry="11" fill="#C4854A"/>
+          <ellipse cx="228" cy="162" rx="8" ry="11" fill="#C4854A"/>
+          <!-- Laptop -->
+          <rect x="100" y="285" width="140" height="4" rx="2" fill="#3A4555" opacity="0.3"/>
+          <!-- Code brackets decoration -->
+          <text x="134" y="178" font-family="monospace" font-size="0" fill="transparent">{ }</text>
+          <defs>
+            <radialGradient id="bg-grad" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#E8F7F2"/>
+              <stop offset="100%" stop-color="#F4F6F8"/>
+            </radialGradient>
+          </defs>
+        </svg>
+
+        <!-- Floating chips -->
+        <div class="floating-chip chip-1"><div class="chip-dot"></div> React · Node.js</div>
+        <div class="floating-chip chip-2"><div class="chip-dot"></div> ~60k users</div>
+        <div class="floating-chip chip-3"><div class="chip-dot"></div> 75% cost cut</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-label">About me</div>
+    <h2>Engineer. Architect.<br><em>Team builder.</em></h2>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>I'm a <strong>Principal Software Engineer</strong> with over 10 years of experience building scalable MERN-stack products across EdTech, FinTech, and Logistics. I bring a rare combination of hands-on architectural depth and engineering leadership.</p>
+        <p>I've led teams through everything from <strong>zero-to-one product builds</strong> to distributed systems serving tens of thousands of users. I'm most energised when technical decisions directly move business outcomes — whether that's reducing cloud costs by 20%, cutting AI running costs by 75%, or shipping a real-time collaboration engine that becomes a product differentiator.</p>
+        <p>Currently at <strong>ELB Learning</strong> as a Principal Software Engineer, building EdTech infrastructure for ~60,000 active users. I'm open to senior IC or tech-lead roles at product companies where engineering quality drives growth.</p>
+      </div>
+      <div class="about-cards reveal">
+        <div class="about-card">
+          <div class="about-card-icon">🏗️</div>
+          <div>
+            <div class="about-card-title">System Architecture</div>
+            <div class="about-card-desc">Microservices, event-driven systems, real-time engines, HLD/LLD for distributed platforms at scale.</div>
+          </div>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">🤖</div>
+          <div>
+            <div class="about-card-title">AI Integration</div>
+            <div class="about-card-desc">Prompt engineering, LLM-powered features, AI cost optimisation and workflow automation.</div>
+          </div>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">☁️</div>
+          <div>
+            <div class="about-card-title">Cloud & DevOps</div>
+            <div class="about-card-desc">AWS, GCP, Docker, Kubernetes, Terraform, CI/CD pipelines and infrastructure cost optimisation.</div>
+          </div>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">👥</div>
+          <div>
+            <div class="about-card-title">Team Leadership</div>
+            <div class="about-card-desc">Mentoring engineers, championing TDD, code quality standards and reducing technical debt systematically.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-label">What I've built</div>
+    <h2>Selected <em>Projects</em></h2>
+    <p class="section-intro">A selection of products and platforms I've owned across multiple industries and companies.</p>
+    <div class="projects-grid">
+
+      <div class="role-group reveal"><h3>ELB Learning · 2025–Present</h3></div>
+
+      <div class="project-card reveal">
+        <div class="project-company">ELB Learning</div>
+        <div class="project-name">Real-Time Collaboration Engine</div>
+        <div class="project-domain">EdTech</div>
+        <div class="project-desc">Architected a multi-user content editing engine supporting 50 simultaneous editors with conflict resolution — a core platform differentiator serving ~60,000 active users.</div>
+        <div class="project-techs">
+          <span class="project-tech">Node.js</span><span class="project-tech">WebSockets</span><span class="project-tech">PostgreSQL</span><span class="project-tech">Redis</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-company">ELB Learning</div>
+        <div class="project-name">AI Prompt Optimisation Engine</div>
+        <div class="project-domain">EdTech · AI</div>
+        <div class="project-desc">Redesigned AI feature prompt architecture, cutting LLM running costs by ~75% while maintaining output quality across a platform serving 60,000 users.</div>
+        <div class="project-techs">
+          <span class="project-tech">Prompt Engineering</span><span class="project-tech">LLM Integration</span><span class="project-tech">Node.js</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-company">ELB Learning</div>
+        <div class="project-name">Third-Party Integration Framework</div>
+        <div class="project-domain">EdTech · SaaS</div>
+        <div class="project-desc">Built a configuration-driven partner onboarding framework that reduced integration time from weeks-to-months down to days, accelerating commercial partnerships.</div>
+        <div class="project-techs">
+          <span class="project-tech">Node.js</span><span class="project-tech">AWS</span><span class="project-tech">Config Architecture</span>
+        </div>
+      </div>
+
+      <div class="role-group reveal"><h3>LTIMindtree · 2024–2025</h3></div>
+
+      <div class="project-card reveal">
+        <div class="project-company">LTIMindtree</div>
+        <div class="project-name">AI Survey Generation Platform</div>
+        <div class="project-domain">Consulting · AI</div>
+        <div class="project-desc">Designed and shipped an AI-powered survey generation platform tailored to consulting firm workflows, significantly reducing manual survey creation time.</div>
+        <div class="project-techs">
+          <span class="project-tech">Node.js</span><span class="project-tech">React</span><span class="project-tech">LLM Integration</span><span class="project-tech">AWS</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-company">LTIMindtree</div>
+        <div class="project-name">Microservices Event Monitoring Dashboard</div>
+        <div class="project-domain">Enterprise · DevOps</div>
+        <div class="project-desc">Built a real-time monitoring dashboard using schema comparison to auto-detect pipeline fail events, improving microservices communication efficiency by 20%.</div>
+        <div class="project-techs">
+          <span class="project-tech">React</span><span class="project-tech">Micro Frontends</span><span class="project-tech">Event Streaming</span>
+        </div>
+      </div>
+
+      <div class="role-group reveal"><h3>Sparsh Technologies (TatvaSoft) · 2018–2023</h3></div>
+
+      <div class="project-card reveal">
+        <div class="project-company">TatvaSoft</div>
+        <div class="project-name">Social Commerce Engine</div>
+        <div class="project-domain">E-commerce · AI</div>
+        <div class="project-desc">Built an AI-powered product matching and personalised ad delivery engine, achieving 50% faster product listing and order-tracking throughput.</div>
+        <div class="project-techs">
+          <span class="project-tech">Node.js</span><span class="project-tech">React</span><span class="project-tech">MongoDB</span><span class="project-tech">AWS</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-company">TatvaSoft</div>
+        <div class="project-name">Logistics Tracking & Routing Platform</div>
+        <div class="project-domain">Logistics · Enterprise</div>
+        <div class="project-desc">Modernised a global logistics firm's tracking and routing service with smarter batching and route optimisation, driving a 20% productivity increase.</div>
+        <div class="project-techs">
+          <span class="project-tech">Node.js</span><span class="project-tech">PostgreSQL</span><span class="project-tech">GCP</span><span class="project-tech">Redis</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-company">TatvaSoft</div>
+        <div class="project-name">CRM Telecalling Automation System</div>
+        <div class="project-domain">FinTech · CRM</div>
+        <div class="project-desc">Designed a telecalling CRM module automating outbound sales, lead management, and follow-up workflows — eliminating manual effort for sales teams.</div>
+        <div class="project-techs">
+          <span class="project-tech">Node.js</span><span class="project-tech">React</span><span class="project-tech">MySQL</span>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-company">TatvaSoft</div>
+        <div class="project-name">Mining Operations Data Platform</div>
+        <div class="project-domain">Industrial · Enterprise</div>
+        <div class="project-desc">Delivered a multi-tenant platform for mining organisations to manage survey and maintenance data at scale across multiple sites.</div>
+        <div class="project-techs">
+          <span class="project-tech">Node.js</span><span class="project-tech">PostgreSQL</span><span class="project-tech">React</span><span class="project-tech">GCP</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="section-label">Technical toolkit</div>
+    <h2>Skills &amp; <em>Technologies</em></h2>
+    <p class="section-intro">A decade of building across the full stack — from database design to cloud infrastructure to AI integration.</p>
+    <div class="skills-layout reveal">
+      <div class="skill-group">
+        <div class="skill-group-title">Languages</div>
+        <div class="skill-pills">
+          <span class="skill-pill">TypeScript</span><span class="skill-pill">JavaScript</span><span class="skill-pill">PHP</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">Backend</div>
+        <div class="skill-pills">
+          <span class="skill-pill">Node.js</span><span class="skill-pill">Express</span><span class="skill-pill">Nest.js</span><span class="skill-pill">Hapi.js</span><span class="skill-pill">Next.js</span><span class="skill-pill">GraphQL</span><span class="skill-pill">REST</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">Frontend</div>
+        <div class="skill-pills">
+          <span class="skill-pill">React.js</span><span class="skill-pill">Redux</span><span class="skill-pill">Vite</span><span class="skill-pill">Webpack</span><span class="skill-pill">Tailwind CSS</span><span class="skill-pill">SCSS</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">Cloud & DevOps</div>
+        <div class="skill-pills">
+          <span class="skill-pill">AWS</span><span class="skill-pill">GCP</span><span class="skill-pill">Docker</span><span class="skill-pill">Kubernetes</span><span class="skill-pill">Terraform</span><span class="skill-pill">GitHub Actions</span><span class="skill-pill">CI/CD</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">Databases</div>
+        <div class="skill-pills">
+          <span class="skill-pill">PostgreSQL</span><span class="skill-pill">MySQL</span><span class="skill-pill">MongoDB</span><span class="skill-pill">DynamoDB</span><span class="skill-pill">Redis</span><span class="skill-pill">ElasticSearch</span><span class="skill-pill">Algolia</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">Architecture</div>
+        <div class="skill-pills">
+          <span class="skill-pill">Microservices</span><span class="skill-pill">Micro Frontends</span><span class="skill-pill">Event-Driven</span><span class="skill-pill">System Design</span><span class="skill-pill">HLD/LLD</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">Testing</div>
+        <div class="skill-pills">
+          <span class="skill-pill">Jest</span><span class="skill-pill">Vitest</span><span class="skill-pill">React Testing Library</span><span class="skill-pill">TDD</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">AI & Security</div>
+        <div class="skill-pills">
+          <span class="skill-pill">Prompt Engineering</span><span class="skill-pill">LLM Integration</span><span class="skill-pill">OWASP</span><span class="skill-pill">SonarQube</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="section-label">Work history</div>
+    <h2>10+ Years of <em>Experience</em></h2>
+    <p class="section-intro">From PHP developer to Principal Engineer — a decade of building, leading, and shipping.</p>
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-header">
+          <div class="timeline-title">Principal Software Engineer</div>
+          <div class="timeline-dates">Jul 2025 – Present</div>
+        </div>
+        <div class="timeline-company">ELB Learning · Chennai, India</div>
+        <ul class="timeline-bullets">
+          <li>Cut query response times from 5s+ to ~1.25s (75% improvement) for a platform serving ~60,000 active users.</li>
+          <li>Architected real-time collaboration engine supporting 50 simultaneous editors with conflict resolution.</li>
+          <li>Reduced AI feature costs by ~75% through systematic prompt optimisation.</li>
+          <li>Led and mentored a team of 2–5 engineers, championing TDD and code quality standards.</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-header">
+          <div class="timeline-title">Specialist Software Engineer</div>
+          <div class="timeline-dates">Mar 2024 – Jun 2025</div>
+        </div>
+        <div class="timeline-company">LTIMindtree · Pune, India</div>
+        <ul class="timeline-bullets">
+          <li>Drove 30% increase in user engagement through Micro Frontend architecture with high-performance React components.</li>
+          <li>Built real-time event monitoring dashboard improving pipeline efficiency by 20%.</li>
+          <li>Shipped AI-powered survey generation platform for consulting firm workflows.</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-header">
+          <div class="timeline-title">Senior Software Engineer</div>
+          <div class="timeline-dates">Oct 2023 – Feb 2024 · Contract</div>
+        </div>
+        <div class="timeline-company">Solvex Solution (intive) · Ahmedabad, India</div>
+        <ul class="timeline-bullets">
+          <li>Led technical pre-sales workshops and effort estimations that improved project conversion rates.</li>
+          <li>Designed and ran engineering hiring assessments during a rapid growth phase.</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-header">
+          <div class="timeline-title">Team Leader / Senior Full-Stack Engineer</div>
+          <div class="timeline-dates">Jan 2018 – Oct 2023</div>
+        </div>
+        <div class="timeline-company">Sparsh Technologies (TatvaSoft) · Ahmedabad, India</div>
+        <ul class="timeline-bullets">
+          <li>Cut monthly GCP cloud costs by 20% without degrading service availability.</li>
+          <li>Achieved 90% code coverage and 40% reduction in production bugs through TDD adoption.</li>
+          <li>Delivered AI-powered social commerce engine and logistics routing platform across multiple clients.</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-header">
+          <div class="timeline-title">PHP Developer</div>
+          <div class="timeline-dates">Jan 2016 – Dec 2017</div>
+        </div>
+        <div class="timeline-company">MXICODERS · Ahmedabad, India</div>
+        <ul class="timeline-bullets">
+          <li>Built a custom CodeIgniter framework layer accelerating delivery across 10+ client projects.</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-label">Get in touch</div>
+    <h2>Let's build something <em>great.</em></h2>
+    <p class="section-intro">Open to Principal Engineer and Staff Engineer roles at product companies. Let's talk.</p>
+    <div class="contact-links">
+      <a href="mailto:kathakdabhi@gmail.com" class="contact-link">
+        <span class="contact-icon">✉️</span> kathakdabhi@gmail.com
+      </a>
+      <a href="tel:+917698294508" class="contact-link">
+        <span class="contact-icon">📱</span> +91-76982 94508
+      </a>
+      <a href="https://linkedin.com/in/kathakdabhi" target="_blank" class="contact-link">
+        <span class="contact-icon">💼</span> linkedin.com/in/kathakdabhi
+      </a>
+    </div>
+    <div class="footer-note">
+      © 2026 Kathak Dabhi · Built with HTML, CSS & JS · Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a>
+    </div>
+  </section>
+
+  <script>
+    // Nav scroll shadow
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal, .timeline-item');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
 </html>
